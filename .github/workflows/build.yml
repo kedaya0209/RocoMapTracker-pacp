@@ -30,7 +30,7 @@ jobs:
 
       - name: Build with PyInstaller
         run: |
-          pyinstaller --noconfirm --noconsole --onedir --name "RocoMapTracker-pcap" `
+          pyinstaller --noconfirm --noconsole --onedir --icon rmt.ico --name "RocoMapTracker-pcap" `
             --add-data "assert;assert" `
             --add-data "RKPP;RKPP" `
             --paths RKPP `
