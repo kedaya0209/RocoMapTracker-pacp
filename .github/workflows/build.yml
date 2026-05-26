@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
 
+env:
+  APP_VERSION: v1.0.0
+
 jobs:
   build:
     runs-on: windows-latest
@@ -40,15 +43,14 @@ jobs:
 
       - name: Package artifact
         run: |
-          Compress-Archive -Path dist/RocoMapTracker-pcap/* -DestinationPath RocoMapTracker-pcap-${{ github.run_number }}.zip
+          Compress-Archive -Path dist/RocoMapTracker-pcap/* -DestinationPath RocoMapTracker-pcap-${{ env.APP_VERSION }}.zip
 
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
-          tag: build-${{ github.run_number }}
-          name: Build #${{ github.run_number }}
+          tag: ${{ env.APP_VERSION }}
+          name: ${{ env.APP_VERSION }}
           body: |
-            Commit: ${{ github.sha }}
-            自动构建于 ${{ github.ref_name }}
-          artifacts: RocoMapTracker-pcap-${{ github.run_number }}.zip
+            自动构建于 ${{ github.ref_name }}@${{ github.sha }}
+          artifacts: RocoMapTracker-pcap-${{ env.APP_VERSION }}.zip
           token: ${{ secrets.GITHUB_TOKEN }}
