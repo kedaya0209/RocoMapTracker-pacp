@@ -1,0 +1,52 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '版本号（如 v1.1.0）'
+        required: true
+        type: string
+
+jobs:
+  release:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+      actions: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifact from latest build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $runId = gh run list --workflow build.yml --branch main --status success --limit 1 --json databaseId --jq '.[0].databaseId'
+          if (-not $runId) {
+            Write-Error "没有找到成功的 Build workflow 运行记录，请先执行 Build"
+            exit 1
+          }
+          echo "BUILD_RUN_ID=$runId" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: RocoMapTracker-pcap
+          path: RocoMapTracker-pcap
+          run-id: ${{ env.BUILD_RUN_ID }}
+          github-token: ${{ github.token }}
+
+      - name: Package artifact
+        run: |
+          Compress-Archive -Path RocoMapTracker-pcap/* -DestinationPath RocoMapTracker-pcap-${{ inputs.version }}.zip
+
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ inputs.version }}
+          name: ${{ inputs.version }}
+          body: |
+            发布 ${{ inputs.version }}
+          artifacts: RocoMapTracker-pcap-${{ inputs.version }}.zip
+          token: ${{ secrets.GITHUB_TOKEN }}
