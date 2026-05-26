@@ -1,0 +1,3 @@
+[submodule "RKPP"]
+	path = RKPP
+	url = https://github.com/yuzeis/Roco-Kingdom-Protocol-Parser.git
